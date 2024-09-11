@@ -5,6 +5,8 @@ go 1.22.0
 toolchain go1.22.6
 
 require (
+	github.com/casdoor/casdoor-go-sdk v0.29.1
+
 	code.sajari.com/docconv/v2 v2.0.0-pre.4
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/avct/uasurfer v0.0.0-20240501094946-ca0c4d1e541b

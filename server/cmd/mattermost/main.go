@@ -4,6 +4,7 @@
 package main
 
 import (
+	"github.com/mattermost/mattermost/server/v8/cmd/mattermost/casdoor"
 	"os"
 
 	"github.com/mattermost/mattermost/server/v8/cmd/mattermost/commands"
@@ -17,6 +18,15 @@ import (
 )
 
 func main() {
+	// Load Casdoor configuration from environment variables
+	err := casdoor.LoadConfig()
+	if err != nil {
+		panic("Failed to load Casdoor configuration")
+	}
+
+	// Initialize Casdoor SDK
+	casdoor.InitAuthConfig()
+
 	if err := commands.Run(os.Args[1:]); err != nil {
 		os.Exit(1)
 	}
