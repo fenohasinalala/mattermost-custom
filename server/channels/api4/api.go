@@ -19,6 +19,9 @@ type Routes struct {
 	APIRoot  *mux.Router // 'api/v4'
 	APIRoot5 *mux.Router // 'api/v5'
 
+	//MOD
+	CustomAuth *mux.Router // 'api/v4/custom_auth
+
 	Users          *mux.Router // 'api/v4/users'
 	User           *mux.Router // 'api/v4/users/{user_id:[A-Za-z0-9]+}'
 	UserByUsername *mux.Router // 'api/v4/users/username/{username:[A-Za-z0-9\\_\\-\\.]+}'
@@ -167,6 +170,9 @@ func Init(srv *app.Server) (*API, error) {
 	api.BaseRoutes.APIRoot = srv.Router.PathPrefix(model.APIURLSuffix).Subrouter()
 	api.BaseRoutes.APIRoot5 = srv.Router.PathPrefix(model.APIURLSuffixV5).Subrouter()
 
+	//MOD
+	api.BaseRoutes.CustomAuth = api.BaseRoutes.APIRoot.PathPrefix("/custom_auth").Subrouter()
+
 	api.BaseRoutes.Users = api.BaseRoutes.APIRoot.PathPrefix("/users").Subrouter()
 	api.BaseRoutes.User = api.BaseRoutes.APIRoot.PathPrefix("/users/{user_id:[A-Za-z0-9]+}").Subrouter()
 	api.BaseRoutes.UserByUsername = api.BaseRoutes.Users.PathPrefix("/username/{username:[A-Za-z0-9\\_\\-\\.]+}").Subrouter()
@@ -286,6 +292,9 @@ func Init(srv *app.Server) (*API, error) {
 
 	api.BaseRoutes.OutgoingOAuthConnections = api.BaseRoutes.APIRoot.PathPrefix("/oauth/outgoing_connections").Subrouter()
 	api.BaseRoutes.OutgoingOAuthConnection = api.BaseRoutes.OutgoingOAuthConnections.PathPrefix("/{outgoing_oauth_connection_id:[A-Za-z0-9]+}").Subrouter()
+
+	//MOD
+	api.InitCustomAuth()
 
 	api.InitUser()
 	api.InitBot()
