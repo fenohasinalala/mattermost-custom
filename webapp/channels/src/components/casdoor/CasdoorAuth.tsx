@@ -1,8 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useEffect} from 'react';
-import {useLocation} from 'react-router-dom';
+import React, {useCallback, useEffect} from 'react';
+import {useHistory, useLocation} from 'react-router-dom';
+
+import {trackEvent} from 'actions/telemetry_actions';
 
 import type {CustomizeHeaderType} from 'components/header_footer_route/header_footer_route';
 
@@ -18,7 +20,9 @@ type AuthCallbackProps = {
     onCustomizeHeader?: CustomizeHeaderType;
 }
 
-const AuthCallback: React.FC = () => {
+const AuthCallback = ({
+    onCustomizeHeader,
+}: AuthCallbackProps) => {
     const location = useLocation();
 
     const handleCallback = (code: string, state: string) => {
@@ -30,6 +34,7 @@ const AuthCallback: React.FC = () => {
         }).then((res) => res.json());
     };
 
+    /*
     const cacheWhoami = (whoami: Whoami) => {
         sessionStorage.setItem('idItem', whoami.id as string);
         sessionStorage.setItem('roleItem', whoami.role as string);
@@ -52,24 +57,40 @@ const AuthCallback: React.FC = () => {
             });
     };
 
+    */
+
+    const history = useHistory();
+
+    const handleHeaderBackButtonOnClick = useCallback(() => {
+        trackEvent('access_problem', 'click_back');
+        history.goBack();
+    }, [history]);
+
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         const state = urlParams.get('state');
         handleCallback(code, state).then((res) => {
             if (res?.status === 'ok') {
-                setSession(res.data);
+                //setSession(res.data);
             } else {
                 //showMessage(res);
             }
         });
     }, [location]);
 
+    useEffect(() => {
+        if (onCustomizeHeader) {
+            onCustomizeHeader({
+                onBackButtonClick: handleHeaderBackButtonOnClick,
+            });
+        }
+    }, [onCustomizeHeader, handleHeaderBackButtonOnClick]);
+
     return (
         <div>
             Chargement, La page est en cours de chargement, merci de bien vouloir patienter.
         </div>
-
     );
 };
 

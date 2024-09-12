@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {AuthCallback} from 'casdoor-react-sdk';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import React, {lazy} from 'react';
@@ -48,6 +47,7 @@ import RootRedirect from './root_redirect';
 import type {PropsFromRedux} from './index';
 
 import 'plugins/export.js';
+const AuthCallback = makeAsyncComponent('AccessProblem', lazy(() => import('components/casdoor/CasdoorAuth')));
 
 const MobileViewWatcher = makeAsyncComponent('MobileViewWatcher', lazy(() => import('components/mobile_view_watcher')));
 const WindowSizeObserver = makeAsyncComponent('WindowSizeObserver', lazy(() => import('components/window_size_observer/WindowSizeObserver')));

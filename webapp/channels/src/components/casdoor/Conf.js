@@ -2,9 +2,9 @@
 // See LICENSE.txt for license information.
 
 export const sdkConfig = {
-    serverUrl: 'https://door.casdoor.com',
-    clientId: '294b09fbc17f95daf2fe',
-    organizationName: 'casbin',
-    appName: 'app-vue-python-example',
+    serverUrl: 'https://numer.casdoor.com',
+    clientId: '9xqak33stinad8u3xy4xtobsrw',
+    organizationName: 'organization_test',
+    appName: 'mattermost_custom',
     redirectPath: '/callback',
 };
