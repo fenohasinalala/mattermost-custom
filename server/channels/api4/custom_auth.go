@@ -12,10 +12,26 @@ import (
 
 func (api *API) InitCustomAuth() {
 	api.BaseRoutes.CustomAuth.Handle("/ping", api.APIHandler(getCustomAuthPing)).Methods(http.MethodGet)
-	api.BaseRoutes.CustomAuth.Handle("/signin", api.APIHandler(signinHandler)).Methods(http.MethodPost)
+	api.BaseRoutes.CustomAuth.Handle("/api/signin", api.APIHandler(signinHandler)).Methods(http.MethodPost)
+	api.BaseRoutes.CustomAuth.Handle("/api/signin", api.APIHandler(signinHandler)).Methods(http.MethodOptions)
 }
 
 func signinHandler(c *Context, w http.ResponseWriter, r *http.Request) {
+	// Gérer les requêtes préliminaires OPTIONS pour CORS
+	if r.Method == "OPTIONS" {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.WriteHeader(http.StatusOK) // Réponse correcte à l'OPTIONS
+		return
+	}
+
+	// En-têtes CORS pour les autres requêtes
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+	// Traitement de la requête POST
 	code := r.URL.Query().Get("code")
 	state := r.URL.Query().Get("state")
 
