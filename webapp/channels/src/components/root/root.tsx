@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {AuthCallback} from 'casdoor-react-sdk';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import React, {lazy} from 'react';
@@ -396,6 +397,10 @@ export default class Root extends React.PureComponent<Props, State> {
                     <HFRoute
                         path={'/login'}
                         component={Login}
+                    />
+                    <Route
+                        path={'/callback'}
+                        component={AuthCallback}
                     />
                     <HFRoute
                         path={'/access_problem'}
