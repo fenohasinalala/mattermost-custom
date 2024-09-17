@@ -131,7 +131,10 @@ const AuthCallback = ({
         handleCallback(code, state).then((res) => {
             if (res?.status === 'ok') {
                 //loginToMattermost('', '', res.data, '');
-                //submit({loginId: '', password: '', token: res.data});
+
+                //TODO: send token
+                //submit({loginId: 'fenohasinalala@gmail.com', password: '00000000', token: ''});
+                submit({loginId: '', password: '', token: res.data});
             } else {
                 //console.error('Error logging in:', res?.status);
             }
