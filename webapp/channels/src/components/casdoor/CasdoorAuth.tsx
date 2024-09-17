@@ -1,13 +1,16 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
+import {useIntl} from 'react-intl';
 import {useDispatch, useSelector} from 'react-redux';
 import {useHistory, useLocation} from 'react-router-dom';
 
-import type {Team} from '@mattermost/types/lib/teams';
+import type {Team} from '@mattermost/types/teams';
 
+import {loadMe} from 'mattermost-redux/actions/users';
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
+import {getIsOnboardingFlowEnabled} from 'mattermost-redux/selectors/entities/preferences';
 import {getMyTeamMember, getTeamByName} from 'mattermost-redux/selectors/entities/teams';
 
 import {trackEvent} from 'actions/telemetry_actions';
@@ -19,12 +22,13 @@ import {
 } from './Setting';
 
 import {redirectUserToDefaultTeam} from '../../actions/global_actions';
+import {addUserToTeamFromInvite} from '../../actions/team_actions';
+import {login} from '../../actions/views/login';
 import LocalStorageStore from '../../stores/local_storage_store';
 import type {GlobalState} from '../../types/store';
 import {setCSRFFromCookie} from '../../utils/utils';
-import {getIsOnboardingFlowEnabled} from "mattermost-redux/selectors/entities/preferences";
-import {loadMe} from "mattermost-redux/actions/users";
-import {addUserToTeamFromInvite} from "../../actions/team_actions";
+import type {AlertBannerProps} from '../alert_banner';
+import type {SubmitOptions} from '../claim/components/email_to_ldap';
 
 type AuthCallbackProps = {
     onCustomizeHeader?: CustomizeHeaderType;
@@ -34,8 +38,11 @@ const AuthCallback = ({
     onCustomizeHeader,
 }: AuthCallbackProps) => {
     const location = useLocation();
-
-    //const [isWaiting, setIsWaiting] = useState(false);
+    const {formatMessage} = useIntl();
+    const [showMfa, setShowMfa] = useState(false);
+    const [hasError, setHasError] = useState(false);
+    const [alertBanner, setAlertBanner] = useState<AlertBannerProps | null>(null);
+    const [isWaiting, setIsWaiting] = useState(false);
     const {pathname, search, hash} = useLocation();
 
     const query = new URLSearchParams(search);
@@ -44,29 +51,7 @@ const AuthCallback = ({
     const history = useHistory();
 
     const {
-        EnableLdap,
-        EnableSaml,
-        EnableSignInWithEmail,
-        EnableSignInWithUsername,
-        EnableSignUpWithEmail,
-        EnableSignUpWithGitLab,
-        EnableSignUpWithOffice365,
-        EnableSignUpWithGoogle,
-        EnableSignUpWithOpenId,
-        EnableOpenServer,
-        EnableUserCreation,
-        LdapLoginFieldName,
-        GitLabButtonText,
-        GitLabButtonColor,
-        OpenIdButtonText,
-        OpenIdButtonColor,
-        SamlLoginButtonText,
-        EnableCustomBrand,
-        CustomDescriptionText,
-        SiteName,
         ExperimentalPrimaryTeam,
-        ForgotPasswordLink,
-        PasswordEnableForgotLink,
     } = useSelector(getConfig);
     const onboardingFlowEnabled = useSelector(getIsOnboardingFlowEnabled);
     const experimentalPrimaryTeam = useSelector((state: GlobalState) => (ExperimentalPrimaryTeam ? getTeamByName(state, ExperimentalPrimaryTeam) : undefined));
@@ -161,6 +146,65 @@ const AuthCallback = ({
         }
     }, [onCustomizeHeader, handleHeaderBackButtonOnClick]);
 
+    const submit = async ({loginId, password, token}: SubmitOptions) => {
+        setIsWaiting(true);
+
+        const {error: loginError} = await dispatch(login(loginId, password, token));
+
+        if (loginError && loginError.server_error_id && loginError.server_error_id.length !== 0) {
+            if (loginError.server_error_id === 'api.user.login.not_verified.app_error') {
+                history.push('/should_verify_email?&email=' + encodeURIComponent(loginId));
+            } else if (loginError.server_error_id === 'store.sql_user.get_for_login.app_error' ||
+                loginError.server_error_id === 'ent.ldap.do_login.user_not_registered.app_error') {
+                setShowMfa(false);
+                setIsWaiting(false);
+                setAlertBanner({
+                    mode: 'danger',
+                    title: formatMessage({
+                        id: 'login.userNotFound',
+                        defaultMessage: "We couldn't find an account matching your login credentials.",
+                    }),
+                });
+                setHasError(true);
+            } else if (loginError.server_error_id === 'api.user.check_user_password.invalid.app_error' ||
+                loginError.server_error_id === 'ent.ldap.do_login.invalid_password.app_error') {
+                setShowMfa(false);
+                setIsWaiting(false);
+                setAlertBanner({
+                    mode: 'danger',
+                    title: formatMessage({
+                        id: 'login.invalidPassword',
+                        defaultMessage: 'Your password is incorrect.',
+                    }),
+                });
+                setHasError(true);
+            } else if (!showMfa && loginError.server_error_id === 'mfa.validate_token.authenticate.app_error') {
+                setShowMfa(true);
+            } else if (loginError.server_error_id === 'api.user.login.invalid_credentials_email_username') {
+                setShowMfa(false);
+                setIsWaiting(false);
+                setAlertBanner({
+                    mode: 'danger',
+                    title: formatMessage({
+                        id: 'login.invalidCredentials',
+                        defaultMessage: 'The email/username or password is invalid.',
+                    }),
+                });
+                setHasError(true);
+            } else {
+                setShowMfa(false);
+                setIsWaiting(false);
+                setAlertBanner({
+                    mode: 'danger',
+                    title: loginError.message,
+                });
+                setHasError(true);
+            }
+            return;
+        }
+
+        await postSubmit();
+    };
 
     const postSubmit = async () => {
         await dispatch(loadMe());
