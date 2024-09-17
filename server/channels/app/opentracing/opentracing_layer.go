@@ -66,6 +66,11 @@ type OpenTracingAppLayer struct {
 	ctx context.Context
 }
 
+func (a *OpenTracingAppLayer) AuthenticateCasdoorUser(c request.CTX, token string) (user *model.User, err *model.AppError) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (a *OpenTracingAppLayer) ActivateMfa(userID string, token string) *model.AppError {
 	origCtx := a.ctx
 	span, newCtx := tracing.StartSpanWithParentByContext(a.ctx, "app.ActivateMfa")

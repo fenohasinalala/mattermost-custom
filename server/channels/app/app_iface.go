@@ -460,6 +460,7 @@ type AppIface interface {
 	AttachCloudSessionCookie(c request.CTX, w http.ResponseWriter, r *http.Request)
 	AttachDeviceId(sessionID string, deviceID string, expiresAt int64) *model.AppError
 	AttachSessionCookies(c request.CTX, w http.ResponseWriter, r *http.Request)
+	AuthenticateCasdoorUser(c request.CTX, token string) (user *model.User, err *model.AppError)
 	AuthenticateUserForLogin(c request.CTX, id, loginId, password, mfaToken, cwsToken string, ldapOnly bool) (user *model.User, err *model.AppError)
 	AuthorizeOAuthUser(c request.CTX, w http.ResponseWriter, r *http.Request, service, code, state, redirectURI string) (io.ReadCloser, string, map[string]string, *model.User, *model.AppError)
 	AutocompleteChannels(c request.CTX, userID, term string) (model.ChannelListWithTeamData, *model.AppError)
