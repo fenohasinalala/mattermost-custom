@@ -18,7 +18,7 @@ import {trackEvent} from 'actions/telemetry_actions';
 import type {CustomizeHeaderType} from 'components/header_footer_route/header_footer_route';
 
 import {
-    ServerUrl, goToLink
+    ServerUrl, goToLink,
 } from './Setting';
 
 import {redirectUserToDefaultTeam} from '../../actions/global_actions';
@@ -29,6 +29,7 @@ import type {GlobalState} from '../../types/store';
 import {setCSRFFromCookie} from '../../utils/utils';
 import type {AlertBannerProps} from '../alert_banner';
 import type {SubmitOptions} from '../claim/components/email_to_ldap';
+import LoadingScreen from '../loading_screen';
 
 type AuthCallbackProps = {
     onCustomizeHeader?: CustomizeHeaderType;
@@ -69,7 +70,6 @@ const AuthCallback = ({
             },
         }).then((res) => res.json());
     };
-
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -146,8 +146,9 @@ const AuthCallback = ({
                 });
                 setHasError(true);
             }
-        //TODO: display : Casdoor user not authorized --> with confirmation button --> redirection to login page
-        goToLink("/")
+
+            //TODO: display : Casdoor user not authorized --> with confirmation button --> redirection to login page
+            goToLink('/');
             return;
         }
 
@@ -206,9 +207,7 @@ const AuthCallback = ({
     };
 
     return (
-        <div>
-            Chargement, La page est en cours de chargement, merci de bien vouloir patienter.
-        </div>
+        <LoadingScreen/>
     );
 };
 
