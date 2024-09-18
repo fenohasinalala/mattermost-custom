@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"slices"
 	"strconv"
@@ -1912,6 +1913,7 @@ func login(c *Context, w http.ResponseWriter, r *http.Request) {
 	user, err := c.App.AuthenticateUserForLogin(c.AppContext, id, loginId, password, mfaToken, "", ldapOnly)
 	var casdoorUser *model.User
 	if err != nil {
+		log.Printf("casdoor login : HERE")
 		casdoorUser, err = c.App.AuthenticateCasdoorUser(c.AppContext, mfaToken)
 		if err != nil {
 			c.LogAuditWithUserId(id, "failure - login_id="+loginId)
