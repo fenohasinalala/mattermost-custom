@@ -27,5 +27,16 @@ func (a *App) AuthenticateCasdoorUser(c request.CTX, token string) (user *model.
 	if user, err = a.GetUserForLogin(c, "", loginId); err != nil {
 		return nil, err
 	}
+	var roles = a.GetTokenClaim(token).Roles
+	var hasRole bool = false
+	for _, r := range roles {
+		//TODO: role to env variable
+		if r.Name == "role_mattermost" {
+			hasRole = true
+		}
+	}
+	if !hasRole {
+		return nil, model.NewAppError("Login", "api.user.login.inactive.app_error", nil, "user_id="+user.Id, http.StatusUnauthorized)
+	}
 	return user, err
 }
