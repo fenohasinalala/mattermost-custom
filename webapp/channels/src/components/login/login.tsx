@@ -898,7 +898,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                                             />
                                         </div>
                                     </form>
-                                    <button onClick={casdoorLogin}>Casdoor Login</button>
+                                    <button className='btn btn-primary  login-body-card-form-button-submit large' style={{marginTop: '50px', height: '48px'}} onClick={casdoorLogin}>Casdoor connexion</button>
                                 </>
                             )}
                             {enableBaseLogin && enableExternalSignup && (
