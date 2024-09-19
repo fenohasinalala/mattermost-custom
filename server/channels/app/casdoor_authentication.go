@@ -6,6 +6,7 @@ import (
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/shared/request"
 	"net/http"
+	"os"
 )
 
 func (a *App) GetTokenClaim(token string) *casdoorsdk.Claims {
@@ -30,8 +31,7 @@ func (a *App) AuthenticateCasdoorUser(c request.CTX, token string) (user *model.
 	var roles = a.GetTokenClaim(token).Roles
 	var hasRole bool = false
 	for _, r := range roles {
-		//TODO: role to env variable
-		if r.Name == "role_mattermost" {
+		if r.Name == os.Getenv("MATTERMOST_ROLE") {
 			hasRole = true
 		}
 	}
