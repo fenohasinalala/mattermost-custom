@@ -19,11 +19,11 @@
     "clean": "npm run clean --workspaces --if-present"
   },
   "dependencies": {
+    "casdoor-react-sdk": "^1.2.0",
+    "casdoor-js-sdk": "^0.11.0",
     "react-intl": "6.6.2"
   },
   "devDependencies": {
-    "casdoor-js-sdk": "^0.11.0",
-    "casdoor-react-sdk": "^1.2.0",
     "@babel/core": "7.21.8",
     "@babel/preset-env": "7.21.5",
     "@babel/preset-react": "7.18.6",
